@@ -21,6 +21,7 @@ bld/
 [Bb]in/
 [Oo]bj/
 .vs
+*.db
 
 # Roslyn cache directories
 *.ide/
@@ -203,3 +204,6 @@ $RECYCLE.BIN/
 *.msi
 *.msm
 *.msp
+/IdentityServerOld/BookStoreIdentityServer.db
+/IdentityServerOld/BookStoreIdentityServerOperational.db
+/IdentityServerOld/BookStoreUsers.db
