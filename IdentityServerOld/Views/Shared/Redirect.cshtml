@@ -1,0 +1,17 @@
+@model RedirectViewModel
+
+<h1>You are now being returned to the application.</h1>
+<p>Once complete, you may close this tab</p>
+
+@* <meta http-equiv="refresh" content="0;url=@Model.RedirectUrl" data-url="@Model.RedirectUrl"> *@
+<span http-equiv="refresh" data-url="@Model.RedirectUrl"></span>
+<script>
+    console.log("Redirecting to...");
+    let dataUrl = document.querySelector("span[http-equiv=refresh]").getAttribute("data-url");
+    console.log(dataUrl);
+    let interval = setInterval(() => {
+        clearInterval(interval);
+        window.location.href = dataUrl;
+    }, 5000);
+</script>
+

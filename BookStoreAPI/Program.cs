@@ -1,5 +1,6 @@
 using System.Text;
 using System.Text.Json;
+using BookStoreAPI.AuthorizationFilters;
 using Microsoft.AspNetCore.HttpLogging;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -68,7 +69,8 @@ internal class Program
                     Type = SecuritySchemeType.OAuth2,
                     Flows = new OpenApiOAuthFlows()
                     {
-                        Implicit = new OpenApiOAuthFlow() {
+                        Implicit = new OpenApiOAuthFlow()
+                        {
                             AuthorizationUrl = new Uri("http://localhost:5000/connect/authorize"),
                             Scopes = { { "bookStoreApi", "Book Store Implicit Flow" } }
                         },
@@ -82,39 +84,37 @@ internal class Program
                     Scheme = "Bearer",
                     Name = "oauth2",
                 });
+
+                c.OperationFilter<SwaggerAuthorizationFilter>();
             });
             builder.Services.AddControllers();
-            builder.Services.AddAuthentication("IdentityServer")
-                .AddJwtBearer("Bearer", o => 
+            builder.Services.AddAuthentication("Bearer").AddJwtBearer("Bearer", o =>
                 {
                     o.Authority = "http://localhost:5000";
-                    o.TokenValidationParameters = new TokenValidationParameters() 
+                    o.TokenValidationParameters = new TokenValidationParameters()
                     {
                         ValidateAudience = false,
+                        ValidateIssuer = false,
+                        ValidateIssuerSigningKey = false,
+                        ValidateActor = false,
+                        ValidateLifetime = false,
+                        ValidateTokenReplay = false
                     };
                     // Disabling for local development purposes
                     o.RequireHttpsMetadata = false;
-                })
-                .AddIdentityServerAuthentication("IdentityServer", o =>
-                {
-                    o.RequireHttpsMetadata = false;
-                    o.SaveToken = true;
-                    // o.ApiName = "bookStore";
-                    // o.SupportedTokens = IdentityServer4.AccessTokenValidation.SupportedTokens.Jwt;
-                    // o.Challenge = "Bearer";
                 });
             
             builder.Services.AddAuthorization(o => 
             {
                 o.AddPolicy("Implicit", p =>
                 {
-                        p.RequireAuthenticatedUser();
-                        p.RequireClaim("scope", "bookStoreApi");
+                    p.RequireAuthenticatedUser();
+                    p.RequireClaim("scope", "bookStoreApi");
                 });
                 o.AddPolicy("ClientCredentials", p =>
                 {
-                        // p.RequireAuthenticatedUser();
-                        p.RequireClaim("scope", "bookStoreApiPostman");
+                    p.RequireAuthenticatedUser();
+                    p.RequireClaim("scope", "bookStoreApiPostman");
                 });
             });
             var app = builder.Build();
@@ -123,7 +123,8 @@ internal class Program
             // Configure the HTTP request pipeline.
             app.UseSwaggerUI(c =>
             {
-                c.OAuthScopes("bookStoreApi", "bookStoreApiPostman");
+                //c.OAuthScopes("bookStoreApiPostman");
+                //c.OAuth2RedirectUrl()
             });
             app.UseSwagger();
             // app.UseHttpsRedirection();

@@ -83,7 +83,7 @@ namespace IdentityServer
                     },
 
                     RedirectUris = { "https://localhost:6001/swagger/oauth2-redirect.html" },
-                    PostLogoutRedirectUris = { "https://localhost:6001/swagger/oauth2-redirect.html" },
+                    PostLogoutRedirectUris = { "https://localhost:6001/swagger" },
 
                     // scopes that client has access to
                     AllowedScopes =

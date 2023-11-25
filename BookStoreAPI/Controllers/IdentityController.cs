@@ -9,7 +9,6 @@ namespace BookStoreAPI.Controllers;
 public class IdentityController : Controller
 {
     [HttpGet]
-    [AllowAnonymous]
     public IActionResult Get()
     {
         return new JsonResult(from c in User.Claims select new { c.Type, c.Value });

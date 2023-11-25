@@ -1,0 +1,18 @@
+﻿@model InMemoryData;
+
+
+@{
+    string serializedModel = string.Empty;
+    if (Model != null)
+    {
+        serializedModel = JsonSerializer.Serialize(Model, new JsonSerializerOptions()
+                {
+                    WriteIndented = true,
+                    ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles
+                });
+    }
+}
+
+<h1>InMemory - current data:</h1>
+<h3>Clients:</h3>
+<pre>@serializedModel</pre>
