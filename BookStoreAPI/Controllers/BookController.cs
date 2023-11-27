@@ -54,7 +54,7 @@ namespace BookStoreAPI.Controllers
 			};
 		}
 
-		[HttpGet("[action]")]
+		[HttpPost("[action]")]
 		[ProducesResponseType(StatusCodes.Status200OK, Type = typeof(BaseResponse<IEnumerable<BookModel>>))]
 		[ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(BaseResponse<IEnumerable<BookModel>>))]
 		[ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(BaseResponse<IEnumerable<BookModel>>))]

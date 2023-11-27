@@ -33,6 +33,7 @@ namespace BookStoreAPI.Data.Repository
 
 		public async Task<T> DeleteAsync(T entity)
 		{
+			_dbContext.ChangeTracker.Clear();
 			_dbContext.Set<T>().Remove(entity);
 			return await Task.FromResult(entity);
 		}

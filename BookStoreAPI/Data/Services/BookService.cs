@@ -73,7 +73,7 @@ namespace BookStoreAPI.Data.Services
 			try
 			{
 				var existingBookModel = await GetByIdAsync(id);
-				if (existingBookModel.Result != null)
+				if (existingBookModel.Result == null)
 				{
 					response.StatusCode = StatusCodes.Status404NotFound;
 					return response;
@@ -102,7 +102,7 @@ namespace BookStoreAPI.Data.Services
 			try
 			{
 				var existingBookModel = await GetByIdAsync(id);
-				if (existingBookModel.Result != null)
+				if (existingBookModel.Result == null)
 				{
 					response.StatusCode = StatusCodes.Status404NotFound;
 					return response;

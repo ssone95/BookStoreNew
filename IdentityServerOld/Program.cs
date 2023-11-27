@@ -77,7 +77,12 @@ namespace IdentityServer
                 options.EnableDetailedErrors(true);
                 options.EnableSensitiveDataLogging(true);
                 var connString = builder.Configuration.GetConnectionString("UsersDb");
-                options.UseSqlite(connString, sql => sql.MigrationsAssembly(MigrationsAssemblyName));
+                options.UseSqlServer(connString, sql =>
+                {
+                    sql.EnableRetryOnFailure();
+                    sql.MigrationsAssembly(MigrationsAssemblyName);
+                });
+                //options.UseSqlite(connString, sql => sql.MigrationsAssembly(MigrationsAssemblyName));
             });
 
             builder.Services.AddIdentity<AppUser, IdentityRole>()
@@ -113,7 +118,12 @@ namespace IdentityServer
                         db.EnableSensitiveDataLogging(true);
                         db.EnableDetailedErrors(true);
                         var connString = webAppBuilder.Configuration.GetConnectionString("ConfigurationDb");
-                        db.UseSqlite(connString, sql => sql.MigrationsAssembly(MigrationsAssemblyName));
+						db.UseSqlServer(connString, so =>
+						{
+							so.EnableRetryOnFailure();
+							so.MigrationsAssembly(MigrationsAssemblyName);
+						});
+						//db.UseSqlite(connString, sql => sql.MigrationsAssembly(MigrationsAssemblyName));
                     };
                 })
                 .AddOperationalStore(options =>
@@ -121,8 +131,13 @@ namespace IdentityServer
                     options.ConfigureDbContext = db =>
                     {
                         var connString = webAppBuilder.Configuration.GetConnectionString("OperationalDb");
-                        db.UseSqlite(connString, sql => sql.MigrationsAssembly(MigrationsAssemblyName));
-                    };
+						db.UseSqlServer(connString, sql =>
+						{
+							sql.EnableRetryOnFailure();
+							sql.MigrationsAssembly(MigrationsAssemblyName);
+						});
+						//db.UseSqlite(connString, sql => sql.MigrationsAssembly(MigrationsAssemblyName));
+					};
                     options.EnableTokenCleanup = true;
                     var tokenExpirationTimeSpanStr = webAppBuilder.Configuration.GetValue<string>("Security:TokenExpirationTimeSpan");
 
@@ -132,7 +147,7 @@ namespace IdentityServer
                     options.TokenCleanupInterval = (int)tokenExpirationSpan.TotalSeconds;
                 });
 
-            if (webAppBuilder.Environment.IsDevelopment())
+            if (webAppBuilder.Environment.IsDevelopment() || webAppBuilder.Environment.IsEnvironment("Docker")) // Added Docker to avoid manual certificate creation
             {
                 builder.AddDeveloperSigningCredential();
             }

@@ -141,7 +141,12 @@ internal class Program
 			options.EnableDetailedErrors(true);
 			options.EnableSensitiveDataLogging(true);
 			var connString = builder.Configuration.GetConnectionString("BookStoreDb") ?? string.Empty;
-			options.UseSqlite(connString, sql => sql.MigrationsAssembly(MigrationsAssemblyName));
+			options.UseSqlServer(connString, sql =>
+			{
+				sql.EnableRetryOnFailure();
+				sql.MigrationsAssembly(MigrationsAssemblyName);
+			});
+			//options.UseSqlite(connString, sql => sql.MigrationsAssembly(MigrationsAssemblyName));
 		});
 
 		builder.Services.AddAuthorization(o =>

@@ -13,8 +13,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IdentityServerOld", "Identi
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IdentityServer", "IdentityServer\IdentityServer.csproj", "{EFF0622C-910B-431A-A34A-B1FBE9F5F224}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ISClient", "ISClient\ISClient.csproj", "{2A53072E-76CB-45F9-9122-E9CA1E5CB832}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Scripts", "Scripts", "{1E5527E5-5C23-4535-8678-D7599C17BE97}"
 	ProjectSection(SolutionItems) = preProject
 		GenerateSha256.ps1 = GenerateSha256.ps1
@@ -43,10 +41,6 @@ Global
 		{EFF0622C-910B-431A-A34A-B1FBE9F5F224}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EFF0622C-910B-431A-A34A-B1FBE9F5F224}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EFF0622C-910B-431A-A34A-B1FBE9F5F224}.Release|Any CPU.Build.0 = Release|Any CPU
-		{2A53072E-76CB-45F9-9122-E9CA1E5CB832}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{2A53072E-76CB-45F9-9122-E9CA1E5CB832}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{2A53072E-76CB-45F9-9122-E9CA1E5CB832}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{2A53072E-76CB-45F9-9122-E9CA1E5CB832}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

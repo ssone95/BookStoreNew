@@ -10,7 +10,8 @@ namespace BookStoreAPI.Data.Mappers
 			AuthorId = book.AuthorId,
 			Id = book.BookId,
 			SubTitle = book.SubTitle,
-			Title = book.Title
+			Title = book.Title,
+			Author = book.Author?.Map()
 		};
 
 		public static Book Map(this BookModel bookModel) => new()

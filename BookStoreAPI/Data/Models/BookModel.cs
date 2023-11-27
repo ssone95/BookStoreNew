@@ -18,5 +18,8 @@ namespace BookStoreAPI.Data.Models
 		public string Title { get; set; }
 		[JsonPropertyName("subTitle")]
 		public string SubTitle { get; set; }
+
+		[JsonPropertyName("author")]
+		public AuthorModel Author { get; set; }
 	}
 }
