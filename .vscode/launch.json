@@ -1,0 +1,62 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "C#: BookStoreAPI Debug",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "BuildBookStoreAPI",
+            "program": "${workspaceFolder}/BookStoreAPI/bin/Debug/net7.0/BookStoreAPI.dll",
+            "args": ["--urls","https://localhost:6001;http://localhost:6000"],
+            // "serverReadyAction":{
+            //     "action": "openExternally",
+            //     "pattern": "\\bNow listening on:\\s+http(?:s)://localhost:([0-9]+)",
+            //     "uriFormat": "https://localhost:%s/api/swagger",
+            //     "killOnServerStop": true
+            // },
+            "externalConsole": true
+        },
+        {
+            "name": "C#: IdentityServer Debug",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "BuildIdentityServer",
+            "program": "${workspaceFolder}/IdentityServer/bin/Debug/net7.0/IdentityServer.dll",
+            "args": ["--urls","https://localhost:5001;http://localhost:5000"],
+            "serverReadyAction":{
+                "action": "openExternally",
+                "pattern": "\\nNow listening on:\\s+http://localhost:([0-9]+)",
+                "uriFormat": "http://localhost:%s/.well-known/openid-configuration",
+                "killOnServerStop": true
+            },
+            "externalConsole": true
+        },
+        {
+            "name": "C#: IdentityServerOld Debug",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "BuildIdentityServerOld",
+            "program": "${workspaceFolder}/IdentityServerOld/bin/Debug/net7.0/IdentityServerOld.dll",
+            "args": ["--urls","https://localhost:5001;http://localhost:5000"],
+            "serverReadyAction":{
+                "action": "openExternally",
+                "pattern": "\\nNow listening on:\\s+http://localhost:([0-9]+)",
+                "uriFormat": "http://localhost:%s/.well-known/openid-configuration",
+                "killOnServerStop": true
+            },
+            "externalConsole": true
+        }
+    ],
+    "compounds": [
+        {
+            "name": "C#: IdentityServerOld+BoookStoreAPI Debug",
+            "configurations": [
+                "C#: IdentityServerOld Debug",
+                "C#: BookStoreAPI Debug"
+            ]
+        }
+    ]
+}

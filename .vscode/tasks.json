@@ -1,0 +1,65 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "BuildBookStoreAPI",
+            "args": [
+                "build", "${workspaceFolder}/BookStoreAPI/BookStoreAPI.csproj"
+            ],
+            "command": "dotnet",
+            "type": "process",
+            "problemMatcher": [
+                "$msCompile"
+            ],
+            "presentation": {
+                "reveal": "always"
+            },
+            "group": "build"
+        },
+        {
+            "label": "BuildIdentityServer",
+            "args": [
+                "build", "${workspaceFolder}/IdentityServer/IdentityServer.csproj"
+            ],
+            "command": "dotnet",
+            "type": "process",
+            "problemMatcher": [
+                "$msCompile"
+            ],
+            "presentation": {
+                "reveal": "always"
+            },
+            "group": "build"
+        },
+        {
+            "label": "BuildIdentityServerOld",
+            "args": [
+                "build", "${workspaceFolder}/IdentityServerOld/IdentityServerOld.csproj"
+            ],
+            "command": "dotnet",
+            "type": "process",
+            "problemMatcher": [
+                "$msCompile"
+            ],
+            "presentation": {
+                "reveal": "always"
+            },
+            "group": "build"
+        },
+        {
+            "label": "BuildSolution",
+            "args": [
+                "build", "${workspaceFolder}/BookStore.sln"
+            ],
+            "command": "dotnet",
+            "type": "process",
+            "problemMatcher": [
+                "$msCompile"
+            ],
+            "presentation": {
+                "reveal": "always"
+            },
+            "group": "build"
+        }
+    ]
+}
