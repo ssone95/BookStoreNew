@@ -1,5 +1,8 @@
 ﻿using IdentityServer4.Stores;
+using System.Text;
+using System;
 using System.Threading.Tasks;
+using System.Security.Cryptography;
 
 namespace IdentityServerOld.Helpers
 {

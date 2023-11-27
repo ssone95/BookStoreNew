@@ -2,236 +2,58 @@
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
 
-using IdentityServer4.EntityFramework.DbContexts;
-using IdentityServer4.EntityFramework.Entities;
 using IdentityServerOld.Data.Contexts;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Serilog;
-using Serilog.Events;
 using Serilog.Sinks.SystemConsole.Themes;
 using System;
-using System.Linq;
-using System.Runtime.Intrinsics.Arm;
-using System.Security.Cryptography;
-using System.Text;
 using IdentityServerOld.Data.Domain;
-using IdentityModel;
-using System.Security.Claims;
-using static IdentityServer4.Models.IdentityResources;
-using System.Data;
+using IdentityServerOld.Extensions;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.CookiePolicy;
+using Microsoft.AspNetCore.Http;
+using IdentityServer4.Configuration;
+using System.Globalization;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
+using System.Reflection;
+using System.Collections.Generic;
 
 namespace IdentityServer
 {
     public class Program
     {
-        public static string Sha256(string input)
-        {
-            using (var sha = SHA256.Create())
-            {
-                var bytes = Encoding.UTF8.GetBytes(input);
-                var hash = sha.ComputeHash(bytes);
+        private static readonly string MigrationsAssemblyName = typeof(Program).GetTypeInfo().Assembly.GetName().Name;
+        private const string ApiCorsPolicy = "ApiCorsPolicy";
+        private const string TokenExpirationTimeSpanFormat = @"h\:mm\:ss";
 
-                return Convert.ToBase64String(hash);
-            }
-        }
-
-        public static int Main(string[] args)
+        public static async Task Main(string[] args)
         {
             Log.Logger = new LoggerConfiguration()
-                .MinimumLevel.Verbose()
-                .MinimumLevel.Override("Microsoft", LogEventLevel.Verbose)
-                .MinimumLevel.Override("Microsoft.Hosting.Lifetime", LogEventLevel.Verbose)
-                .MinimumLevel.Override("System", LogEventLevel.Verbose)
-                .MinimumLevel.Override("Microsoft.AspNetCore.Authentication", LogEventLevel.Verbose)
-                .MinimumLevel.Override("IdentityServer4.Validation", LogEventLevel.Verbose)
+                .MinimumLevel.Warning()
                 .Enrich.FromLogContext()
-                // uncomment to write to Azure diagnostics stream
-                //.WriteTo.File(
-                //    @"D:\home\LogFiles\Application\identityserver.txt",
-                //    fileSizeLimitBytes: 1_000_000,
-                //    rollOnFileSizeLimit: true,
-                //    shared: true,
-                //    flushToDiskInterval: TimeSpan.FromSeconds(1))
                 .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level}] {SourceContext}{NewLine}{Message:lj}{NewLine}{Exception}{NewLine}", theme: AnsiConsoleTheme.Code)
                 .CreateLogger();
 
             try
             {
-                Log.Information("Starting host...");
-                string original = "Secret123$";
-                string hashed = Sha256(original);
-                Log.Information("Hashed secret: {original} -> {hashed}", original, hashed);
-                var builder = CreateHostBuilder(args).Build();
-                using (var scope = builder.Services.GetRequiredService<IServiceScopeFactory>().CreateScope())
-                {
-                    using (var persistedGrantDbContext = scope.ServiceProvider.GetRequiredService<PersistedGrantDbContext>())
-                    {
-                        persistedGrantDbContext.Database.Migrate();
-                    }
-                }
-                using (var scope = builder.Services.GetRequiredService<IServiceScopeFactory>().CreateScope())
-                {
-                    using (var userContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>())
-                    {
-                        userContext.Database.Migrate();
-                    }
-                }
-                using (var scope = builder.Services.GetRequiredService<IServiceScopeFactory>().CreateScope())
-                {
-                    using (var configurationDbContext = scope.ServiceProvider.GetRequiredService<ConfigurationDbContext>())
-                    {
-                        configurationDbContext.Database.Migrate();
-                    }
-                }
-                using (var scope = builder.Services.GetRequiredService<IServiceScopeFactory>().CreateScope())
-                {
-                    using (var userManager = scope.ServiceProvider.GetRequiredService<UserManager<AppUser>>())
-                    using (var userContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>())
-                    {
-                        string[] roles = new string[] { "Administrator", "User" };
-                        if (userContext.Roles.Count() < 1)
-                        {
-                            foreach (string role in roles)
-                            {
-                                var roleStore = new RoleStore<IdentityRole>(userContext);
-                                var result = roleStore.CreateAsync(new IdentityRole(role)
-                                {
-                                    NormalizedName = role.ToUpper()
-                                }).Result;
-                                Log.Information("Role {RoleName} created!", role);
-                            }
-                        }
+                Log.Information("Starting IdentityServer...");
+                var builder = WebApplication.CreateBuilder(args);
+                ConfigureBase(builder);
+                ConfigureIdentityServer(builder);
 
-                        if (userContext.Users.Count() < 1)
-                        {
-                            var passwordHasher = new PasswordHasher<AppUser>();
-                            var users = Config.TestUsers
-                                .Select(x
-                                    => new AppUser()
-                                    {
-                                        UserName = "test123",
-                                        NormalizedUserName = "test123".ToUpper(),
-                                        Email = "nedeljko.savic.c@gmail.com",
-                                        NormalizedEmail = "nedeljko.savic.c@gmail.com".ToUpper(),
-                                        ConcurrencyStamp = Guid.NewGuid().ToString("D"),
-                                        EmailConfirmed = true,
-                                        PhoneNumberConfirmed = true
-                                    }).ToList();
-
-                            var userStore = new UserStore<AppUser>(userContext);
-                            users.ForEach(user =>
-                            {
-                                user.PasswordHash = passwordHasher.HashPassword(user, "Secret123$");
-                                var result = userStore.CreateAsync(user).Result;
-
-                                AppUser existingUser = userManager.FindByEmailAsync(user.Email).Result;
-                                var roleAssignmentResult = userManager.AddToRolesAsync(user, roles).Result;
-                                Log.Information("Created user {UserName}, status: {Result}, roleAssignmentResult: {RoleAssignmentResult}", user.UserName, result, roleAssignmentResult);
-                            });
-
-                        }
-                    }
-                }
-                using (var scope = builder.Services.GetRequiredService<IServiceScopeFactory>().CreateScope())
-                {
-                    using (var configurationDbContext = scope.ServiceProvider.GetRequiredService<ConfigurationDbContext>())
-                    {
-                        if (configurationDbContext.Clients.Count() < 1)
-                        {
-                            var realClients = Config.Clients.Select(x => new Client()
-                            {
-                                ClientId = x.ClientId,
-                                ClientName = x.ClientName,
-
-                                AllowedGrantTypes = x.AllowedGrantTypes
-                                    .Select(y
-                                        => new ClientGrantType()
-                                        {
-                                            GrantType = y
-                                        }).ToList(),
-                                AllowAccessTokensViaBrowser = x.AllowAccessTokensViaBrowser,
-                                RequireConsent = x.RequireConsent,
-                                EnableLocalLogin = x.EnableLocalLogin,
-                                Enabled = x.Enabled,
-                                AllowedCorsOrigins = x.AllowedCorsOrigins
-                                    .Select(y
-                                        => new ClientCorsOrigin()
-                                        {
-                                            Origin = y
-                                        }).ToList(),
-
-                                Claims = x.Claims
-                                    .Select(y
-                                        => new ClientClaim()
-                                        {
-                                            Type = y.Type,
-                                            Value = y.Value
-                                        }).ToList(),
-
-                                ClientSecrets = x.ClientSecrets
-                                    .Select(y
-                                        => new ClientSecret()
-                                        {
-                                            Created = DateTime.Now,
-                                            Description = y.Description,
-                                            Value = y.Value,
-                                            Type = y.Type
-                                        }).ToList(),
-
-                                RedirectUris = x.RedirectUris
-                                    .Select(y
-                                        => new ClientRedirectUri()
-                                        {
-                                            RedirectUri = y
-                                        }).ToList(),
-                                PostLogoutRedirectUris = x.PostLogoutRedirectUris
-                                    .Select(y
-                                        => new ClientPostLogoutRedirectUri()
-                                        {
-                                            PostLogoutRedirectUri = y
-                                        }).ToList(),
-
-                                AllowedScopes = x.AllowedScopes
-                                    .Select(y
-                                        => new ClientScope()
-                                        {
-                                            Scope = y
-                                        }).ToList()
-
-                            });
-                            configurationDbContext.Clients.AddRange(realClients);
-                            configurationDbContext.SaveChanges();
-                        }
-
-                        if (configurationDbContext.ApiScopes.Count() < 1)
-                        {
-                            var apiScopes = Config.ApiScopes
-                                .Select(x => new ApiScope()
-                                {
-                                    Name = x.Name,
-                                    Description = x.Description,
-                                    DisplayName = x.DisplayName,
-                                    Enabled = x.Enabled,
-                                    ShowInDiscoveryDocument = x.ShowInDiscoveryDocument
-                                })
-                                .ToList();
-                            configurationDbContext.ApiScopes.AddRange(apiScopes);
-                            configurationDbContext.SaveChanges();
-                        }
-                    }
-                }
-                builder.Run();
-                return 0;
+                var app = builder.Build();
+                await ConfigureApp(app);
+                await app.RunAsync();
             }
             catch (Exception ex)
             {
-                Log.Fatal(ex, "Host terminated unexpectedly.");
-                return 1;
+                Log.Fatal(ex, "IdentityServer terminated unexpectedly.");
             }
             finally
             {
@@ -239,12 +61,111 @@ namespace IdentityServer
             }
         }
 
-        public static IHostBuilder CreateHostBuilder(string[] args) =>
-            Host.CreateDefaultBuilder(args)
-                .UseSerilog()
-                .ConfigureWebHostDefaults(webBuilder =>
+        private static void ConfigureBase(WebApplicationBuilder builder)
+        {
+            builder.Services.AddLogging(options =>
+            {
+                options.ClearProviders();
+                options.AddSerilog();
+            });
+
+            // Enabled for auth purposes
+            builder.Services.AddControllersWithViews();
+
+            builder.Services.AddDbContext<ApplicationDbContext>(options =>
+            {
+                options.EnableDetailedErrors(true);
+                options.EnableSensitiveDataLogging(true);
+                var connString = builder.Configuration.GetConnectionString("UsersDb");
+                options.UseSqlite(connString, sql => sql.MigrationsAssembly(MigrationsAssemblyName));
+            });
+
+            builder.Services.AddIdentity<AppUser, IdentityRole>()
+                .AddEntityFrameworkStores<ApplicationDbContext>()
+            .AddDefaultTokenProviders();
+        }
+
+        private static void ConfigureIdentityServer(WebApplicationBuilder webAppBuilder)
+        {
+            webAppBuilder.Host.UseSerilog((context, configuration) =>
+            {
+                configuration.ReadFrom.Configuration(context.Configuration);
+            });
+
+			var builder = webAppBuilder.Services.AddIdentityServer(options =>
+            {
+                options.Events.RaiseErrorEvents = true;
+                options.Events.RaiseInformationEvents = true;
+                options.Events.RaiseFailureEvents = true;
+                options.Events.RaiseSuccessEvents = true;
+
+                options.UserInteraction = new UserInteractionOptions
                 {
-                    webBuilder.UseStartup<Startup>();
+                    LogoutUrl = "/Account/Logout", // TODO: Implement Logout support
+                    LoginUrl = "/Account/Login",
+                    LoginReturnUrlParameter = "returnUrl"
+                };
+            }).AddAspNetIdentity<AppUser>()
+                .AddConfigurationStore(options =>
+                {
+                    options.ConfigureDbContext = db =>
+                    {
+                        db.EnableSensitiveDataLogging(true);
+                        db.EnableDetailedErrors(true);
+                        var connString = webAppBuilder.Configuration.GetConnectionString("ConfigurationDb");
+                        db.UseSqlite(connString, sql => sql.MigrationsAssembly(MigrationsAssemblyName));
+                    };
+                })
+                .AddOperationalStore(options =>
+                {
+                    options.ConfigureDbContext = db =>
+                    {
+                        var connString = webAppBuilder.Configuration.GetConnectionString("OperationalDb");
+                        db.UseSqlite(connString, sql => sql.MigrationsAssembly(MigrationsAssemblyName));
+                    };
+                    options.EnableTokenCleanup = true;
+                    var tokenExpirationTimeSpanStr = webAppBuilder.Configuration.GetValue<string>("Security:TokenExpirationTimeSpan");
+
+                    if (string.IsNullOrEmpty(tokenExpirationTimeSpanStr) || !TimeSpan.TryParseExact(tokenExpirationTimeSpanStr, TokenExpirationTimeSpanFormat, CultureInfo.InvariantCulture, out TimeSpan tokenExpirationSpan))
+                        throw new Exception($"Token Expiration (Security:TokenExpirationTimeSpan) must be set, and must be in the following format: {TokenExpirationTimeSpanFormat}!");
+
+                    options.TokenCleanupInterval = (int)tokenExpirationSpan.TotalSeconds;
                 });
+
+            if (webAppBuilder.Environment.IsDevelopment())
+            {
+                builder.AddDeveloperSigningCredential();
+            }
+        }
+
+        private static async Task ConfigureApp(WebApplication app)
+        {
+            if (app.Environment.IsDevelopment())
+            {
+                app.UseDeveloperExceptionPage();
+            }
+
+            app.UseStaticFiles();
+            app.UseRouting();
+
+            app.UseCookiePolicy(new CookiePolicyOptions
+            {
+                HttpOnly = HttpOnlyPolicy.None,
+                MinimumSameSitePolicy = SameSiteMode.None,
+                Secure = CookieSecurePolicy.Always
+            });
+
+            app.UseCors(ApiCorsPolicy);
+
+            app.UseIdentityServer();
+
+            app.UseAuthorization();
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapDefaultControllerRoute();
+            });
+
+			await app.MigrateAndSeedDb(app.Configuration);
+        }
     }
 }

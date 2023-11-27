@@ -1,18 +1,43 @@
 # Step 1 - build application
 
-FROM mcr.microsoft.com/dotnet/sdk:7.0 as build
+FROM mcr.microsoft.com/dotnet/aspnet:6.0 AS base
 WORKDIR /app
-COPY . IdentityServer.csproj
-RUN dotnet restore IdentityServer.csproj
+EXPOSE 80
+EXPOSE 443
 
-RUN mkdir -p /app/src
-WORKDIR /app/src
+FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
+RUN dotnet dev-certs https
+WORKDIR /src
+COPY ["IdentityServerOld/IdentityServerOld.csproj", "IdentityServerOld/"]
+RUN dotnet restore "IdentityServerOld/IdentityServerOld.csproj"
 COPY . .
-RUN dotnet publish -c Release -o out
+WORKDIR "/src/IdentityServerOld"
+RUN dotnet build "IdentityServerOld.csproj" -c Release -o /app/build
 
-# Step 2 - prepare and run application
-FROM mcr.microsoft.com/dotnet/aspnet:7.0
+FROM build AS publish
+RUN dotnet publish "IdentityServerOld.csproj" -c Release -o /app/publish /p:UseAppHost=false
+
+FROM base AS final
 WORKDIR /app
-COPY --from=build /app/src/out .
-EXPOSE 5000 5001
-ENTRYPOINT [ "dotnet", "IdentityServer.dll", "--urls", "http://0.0.0.0:80" ]
+COPY --from=publish /root/.dotnet/corefx/cryptography/x509stores/my/* /root/.dotnet/corefx/cryptography/x509stores/my/
+COPY --from=publish /app/publish .
+ENTRYPOINT [ "dotnet", "IdentityServerOld.dll", "--urls", "http://0.0.0.0:80;https://0.0.0.0:443" ]
+
+#
+#FROM mcr.microsoft.com/dotnet/sdk:7.0 as build
+#WORKDIR /app
+#EXPOSE 80
+#EXPOSE 443
+#COPY . IdentityServer.csproj
+#RUN dotnet restore IdentityServer.csproj
+#
+#RUN mkdir -p /app/src
+#WORKDIR /app/src
+#COPY . .
+#RUN dotnet publish -c Release -o out
+#
+## Step 2 - prepare and run application
+#FROM mcr.microsoft.com/dotnet/aspnet:7.0
+#WORKDIR /app
+#COPY --from=build /app/src/out .
+#ENTRYPOINT [ "dotnet", "IdentityServerOld.dll", "--urls", "http://0.0.0.0:80" ]

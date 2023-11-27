@@ -89,11 +89,11 @@ namespace IdentityServerOld.Controllers
 
             if (Url.IsLocalUrl(model.ReturnUrl))
                 return Redirect(model.ReturnUrl);
-            if (string.IsNullOrEmpty(model.ReturnUrl))
-                return Redirect("https://localhost:6001/swagger");
 
-            throw new Exception("invalid return URL");
-        }
+			ModelState.AddModelError(string.Empty, "No url was configured to serve as return endpoint...");
+			var errorVm = PrepareLoginFormViewModel(model, errorMessage: "No url was configured to serve as return endpoint...");
+			return View(errorVm);
+		}
         private LoginFormViewModel PrepareLoginFormViewModel(string returnUrl)
         {
             return new LoginFormViewModel()

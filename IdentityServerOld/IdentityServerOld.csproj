@@ -1,13 +1,19 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 	<PropertyGroup>
 		<TargetFramework>net6.0</TargetFramework>
+		<UserSecretsId>7fbf0327-9263-4600-ad0a-6f3fa897a72b</UserSecretsId>
+		<DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
 	</PropertyGroup>
+	<ItemGroup>
+	  <_ContentIncludedByDefault Remove="appsettings.Development.json" />
+	</ItemGroup>
 
 	<ItemGroup>
 		<PackageReference Include="IdentityServer4" Version="4.1.2" />
 		<PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="6.0.11" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="6.0.11" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="6.0.11" />
+		<PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.19.4" />
 		<PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="6.0.11" />
 
 		<PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="6.0.11" />
@@ -20,6 +26,7 @@
 		<PackageReference Include="IdentityServer4.EntityFramework" Version="4.1.2" />
 		<PackageReference Include="IdentityServer4.AspNetIdentity" Version="4.1.2" />
 		<PackageReference Include="Serilog.AspNetCore" Version="3.2.0" />
+		<PackageReference Include="Serilog.Settings.Configuration" Version="7.0.1" />
 	</ItemGroup>
 
 	<ItemGroup>
