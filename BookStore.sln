@@ -20,8 +20,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Scripts", "Scripts", "{1E55
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{DE02EC1C-14DC-498A-9A55-82BA5A7ECE9A}"
 	ProjectSection(SolutionItems) = preProject
+		identityserver.env = identityserver.env
 		README.md = README.md
+		bookstoreapi.env = bookstoreapi.env
+		sqlserver.env = sqlserver.env
 	EndProjectSection
+EndProject
+Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{7354F69E-E2D9-41B9-B6CD-248390C14A3B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -41,6 +46,10 @@ Global
 		{EFF0622C-910B-431A-A34A-B1FBE9F5F224}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EFF0622C-910B-431A-A34A-B1FBE9F5F224}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EFF0622C-910B-431A-A34A-B1FBE9F5F224}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7354F69E-E2D9-41B9-B6CD-248390C14A3B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7354F69E-E2D9-41B9-B6CD-248390C14A3B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7354F69E-E2D9-41B9-B6CD-248390C14A3B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7354F69E-E2D9-41B9-B6CD-248390C14A3B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -14,20 +14,19 @@ namespace BookStoreAPI.Data.Repository
 
 		public async Task<(int totalPages, List<Book> books)> SearchBooksAsync(BookSearchModel bookSearchModel)
 		{
-            int itemsPerPage = bookSearchModel.ItemsPerPage;
-            if (itemsPerPage < 1)
-                itemsPerPage = 1;
+            int itemsPerPage = Math.Clamp(bookSearchModel.ItemsPerPage, 1, int.MaxValue);
 
-            int currentPage = bookSearchModel.Page;
-            if (currentPage < 1)
-                currentPage = 1;
+            int currentPage = Math.Clamp(bookSearchModel.Page, 1, int.MaxValue);
 
-            int itemsToSkip = itemsPerPage * (bookSearchModel.Page - 1);
+            int itemsToSkip = Math.Clamp(itemsPerPage * (currentPage - 1), 0, int.MaxValue);
 
-            var booksQueryable = _dbContext.Books
+			string? normalizedTitle = bookSearchModel.Title?.ToLower();
+            string? normalizedAuthor = bookSearchModel.Author?.ToLower();
+			var booksQueryable = _dbContext.Books
                 .Include(x => x.Author)
-                .Where(x => string.IsNullOrEmpty(bookSearchModel.Title) || x.Title.ToLower().Contains(bookSearchModel.Title.ToLower()))
-                .Where(x => string.IsNullOrEmpty(bookSearchModel.Author) || x.Author.Name.ToLower().Contains(bookSearchModel.Author.ToLower()));
+                .Where(x => string.IsNullOrEmpty(normalizedTitle) || x.Title.Contains(normalizedTitle))
+                .Where(x => string.IsNullOrEmpty(normalizedAuthor) || x.Author.Name.Contains(normalizedAuthor))
+                .AsNoTracking();
 
             var totalBooksCount = await booksQueryable.CountAsync();
 

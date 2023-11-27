@@ -21,7 +21,7 @@ FROM base AS final
 WORKDIR /app
 COPY --from=publish /root/.dotnet/corefx/cryptography/x509stores/my/* /root/.dotnet/corefx/cryptography/x509stores/my/
 COPY --from=publish /app/publish .
-ENTRYPOINT [ "dotnet", "IdentityServerOld.dll", "--urls", "http://0.0.0.0:80;https://0.0.0.0:443" ]
+ENTRYPOINT [ "dotnet", "IdentityServerOld.dll" ]
 
 #
 #FROM mcr.microsoft.com/dotnet/sdk:7.0 as build

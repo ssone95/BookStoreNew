@@ -21,4 +21,4 @@ FROM base AS final
 WORKDIR /app
 COPY --from=publish /root/.dotnet/corefx/cryptography/x509stores/my/* /root/.dotnet/corefx/cryptography/x509stores/my/
 COPY --from=publish /app/publish .
-ENTRYPOINT [ "dotnet", "BookStoreAPI.dll", "--urls", "http://0.0.0.0:80;https://0.0.0.0:443" ]
+ENTRYPOINT [ "dotnet", "BookStoreAPI.dll" ]

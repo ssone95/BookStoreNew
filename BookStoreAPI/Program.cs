@@ -1,3 +1,4 @@
+using System.IdentityModel.Tokens.Jwt;
 using System.Reflection;
 using System.Text;
 using BookStoreAPI.AuthorizationFilters;
@@ -9,6 +10,7 @@ using BookStoreAPI.Data.Services.Interfaces;
 using BookStoreAPI.Extensions;
 using Microsoft.AspNetCore.HttpLogging;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Serilog;
@@ -127,12 +129,30 @@ internal class Program
 			{
 				string authority = builder.Configuration.GetValue<string>("Security:IdentityServer:Authority") ?? string.Empty;
 				o.Authority = authority;
+				var isDevEnvironment = builder.Environment.IsDevelopment() 
+					|| builder.Environment.IsEnvironment("Docker");
 				o.TokenValidationParameters = new TokenValidationParameters()
 				{
-					ValidateAudience = false,
+					ValidateAudience = !isDevEnvironment,
+					ValidateIssuer = !isDevEnvironment,
+					ValidateIssuerSigningKey = !isDevEnvironment,
+					RequireExpirationTime = true,
+					ValidateLifetime = true
 				};
+				if (isDevEnvironment)
+				{
+					IdentityModelEventSource.ShowPII = true;
+					o.TokenValidationParameters.SignatureValidator = delegate (string token, TokenValidationParameters tokenValidationParameters)
+					{
+						var jwt = new JwtSecurityToken(token);
+
+						return jwt;
+					};
+				}
 				// Disabling for development purposes
-				o.RequireHttpsMetadata = false;
+
+				o.MetadataAddress = builder.Configuration.GetValue<string>("Security:IdentityServer:MetadataAddress") ?? string.Empty;
+				o.RequireHttpsMetadata = !isDevEnvironment;
 			});
 
 

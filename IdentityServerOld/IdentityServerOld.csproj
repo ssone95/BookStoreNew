@@ -3,6 +3,7 @@
 		<TargetFramework>net6.0</TargetFramework>
 		<UserSecretsId>7fbf0327-9263-4600-ad0a-6f3fa897a72b</UserSecretsId>
 		<DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+		<DockerComposeProjectPath>..\docker-compose.dcproj</DockerComposeProjectPath>
 	</PropertyGroup>
 	<ItemGroup>
 	  <_ContentIncludedByDefault Remove="appsettings.Development.json" />

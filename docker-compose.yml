@@ -1,0 +1,53 @@
+version: '3.4'
+
+name: book-store
+services:
+  bookstoreapi:
+    container_name: bookstoreapi
+    image: ${DOCKER_REGISTRY-}bookstoreapi
+    build:
+      context: .
+      dockerfile: BookStoreAPI/Dockerfile
+    ports:
+      - "6000:80"
+      - "6001:443"
+    env_file:
+        - bookstoreapi.env
+    environment:
+      - ASPNETCORE_Kestrel__Certificates__Default__Password=Secret123$
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/bookstore.pfx
+    volumes:
+      - ${USERPROFILE}/.aspnet/https/bookstore.pfx:/https/bookstore.pfx
+    depends_on:
+      - database
+      - identityserverold
+
+  identityserverold:
+    container_name: identityserverold
+    image: ${DOCKER_REGISTRY-}identityserverold
+    build:
+      context: .
+      dockerfile: IdentityServerOld/Dockerfile
+    ports:
+      - "5000:80"
+      - "5001:443"
+    env_file:
+        - identityserver.env
+    environment:
+      - ASPNETCORE_Kestrel__Certificates__Default__Password=Secret123$
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/bookstore.pfx
+    volumes:
+      - ${USERPROFILE}/.aspnet/https/bookstore.pfx:/https/bookstore.pfx
+    depends_on:
+      - database
+
+  database:
+    container_name: database
+    image: mcr.microsoft.com/mssql/server:latest
+    ports:
+      - "1434:1433"
+    env_file:
+      - sqlserver.env
+    environment:
+      - DATABASE_PUBLIC_URL=database
+
